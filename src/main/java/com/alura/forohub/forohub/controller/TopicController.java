@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,7 +52,11 @@ public class TopicController {
   public ApiResponse<TopicResponseDto> updateTopic(@PathVariable Long id,
       @RequestBody @Valid TopicRequestDto requestDto) {
     return topicService.updateTopic(id, requestDto);
+  }
 
+  @DeleteMapping("/{id}")
+  public ApiResponse<Void> deactivateTopic(@PathVariable Long id) {
+    return topicService.deleteTopic(id);
   }
 
 }
