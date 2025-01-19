@@ -2,6 +2,7 @@ package com.alura.forohub.forohub.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,46 +27,45 @@ public class TopicService {
     this.topicRepository = topicRepository;
   }
 
-@Transactional
-public ApiResponse<TopicResponseDto> createTopic(TopicRequestDto requestDto) {
-  // Verificar si el tópico ya existe
-  if (topicRepository.existsByTitleAndMessage(requestDto.getTitle(), requestDto.getMessage())) {
-    return new ApiResponse<>(false, 400, "El tópico ya existe", null);
+  private TopicResponseDto convertToDto(Topic topic) {
+    TopicResponseDto dto = new TopicResponseDto();
+    dto.setId(topic.getId());
+    dto.setTitle(topic.getTitle());
+    dto.setMessage(topic.getMessage());
+    dto.setCreationDate(topic.getCreationDate());
+    dto.setStatus(topic.getStatus());
+    dto.setAuthor(topic.getAuthor());
+    dto.setCourse(topic.getCourse());
+    dto.setStatus(topic.getStatus());
+    dto.setCreationDate(topic.getCreationDate());
+    return dto;
   }
 
-  // Crear un nuevo objeto Topic
-  Topic topic = new Topic();
-  topic.setTitle(requestDto.getTitle());
-  topic.setMessage(requestDto.getMessage());
-  topic.setAuthor(requestDto.getAuthor());
-  topic.setCourse(requestDto.getCourse());
+  @Transactional
+  public ApiResponse<TopicResponseDto> createTopic(TopicRequestDto requestDto) {
+    if (topicRepository.existsByTitleAndMessage(requestDto.getTitle(), requestDto.getMessage())) {
+      return new ApiResponse<>(false, 400, "El tópico ya existe", null);
+    }
 
-  // Asignar valores automáticos para `status` y `creationDate`
-  topic.setStatus("ACTIVO"); 
-  topic.setCreationDate(LocalDateTime.now()); 
+    Topic topic = new Topic();
+    topic.setTitle(requestDto.getTitle());
+    topic.setMessage(requestDto.getMessage());
+    topic.setAuthor(requestDto.getAuthor());
+    topic.setCourse(requestDto.getCourse());
 
-  // Guardar el tópico en la base de datos
-  topic = topicRepository.save(topic);
+    topic.setStatus("ACTIVO");
+    topic.setCreationDate(LocalDateTime.now());
 
-  // Mapear a TopicResponseDto
-  TopicResponseDto responseDto = new TopicResponseDto();
-  responseDto.setId(topic.getId());
-  responseDto.setTitle(topic.getTitle());
-  responseDto.setMessage(topic.getMessage());
-  responseDto.setAuthor(topic.getAuthor());
-  responseDto.setCourse(topic.getCourse());
-  responseDto.setStatus(topic.getStatus());
-  responseDto.setCreationDate(topic.getCreationDate()); 
+    topic = topicRepository.save(topic);
 
+    TopicResponseDto responseDto = convertToDto(topic);
 
-  return new ApiResponse<>(true, 201, "Tópico creado exitosamente.", List.of(responseDto));
-}
-
+    return new ApiResponse<>(true, 201, "Tópico creado exitosamente.", List.of(responseDto));
+  }
 
   public ApiResponse<TopicResponseDto> getAllTopics(String course, Integer year, Pageable pageable) {
     Page<Topic> topics;
 
-    // Si no se proporciona filtro, obtenemos todos los tópicos
     if (course == null && year == null) {
       topics = topicRepository.findAll(pageable);
     } else if (course != null && year == null) {
@@ -76,7 +76,6 @@ public ApiResponse<TopicResponseDto> createTopic(TopicRequestDto requestDto) {
       topics = topicRepository.findByCourseAndYear(course, year, pageable);
     }
 
-    // Convertir entidades a DTO
     List<TopicResponseDto> response = topics.getContent().stream()
         .map(this::convertToDto)
         .collect(Collectors.toList());
@@ -84,16 +83,45 @@ public ApiResponse<TopicResponseDto> createTopic(TopicRequestDto requestDto) {
     return new ApiResponse<TopicResponseDto>(true, 200, "Tópicos obtenidos exitosamente", response);
   }
 
-  private TopicResponseDto convertToDto(Topic topic) {
-    TopicResponseDto dto = new TopicResponseDto();
-    dto.setId(topic.getId());
-    dto.setTitle(topic.getTitle());
-    dto.setMessage(topic.getMessage());
-    dto.setCreationDate(topic.getCreationDate());
-    dto.setStatus(topic.getStatus());
-    dto.setAuthor(topic.getAuthor());
-    dto.setCourse(topic.getCourse());
-    return dto;
+  @Transactional
+  public ApiResponse<TopicResponseDto> getTopicDetails(Long id) {
+    Topic topic = topicRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Tópico no encontrado"));
+
+    TopicResponseDto responseDto = convertToDto(topic);
+
+    return new ApiResponse<>(true, 200, "Tópico obtenido exitosamente", List.of(responseDto));
+  }
+
+  @Transactional
+  public ApiResponse<TopicResponseDto> updateTopic(Long id, TopicRequestDto requestDto) {
+    Optional<Topic> optionalTopic = topicRepository.findById(id);
+    if (!optionalTopic.isPresent()) {
+      throw new RuntimeException("Tópico no encontrado");
+    }
+
+    Topic topic = optionalTopic.get();
+    topic.setTitle(requestDto.getTitle());
+    topic.setMessage(requestDto.getMessage());
+    topic.setAuthor(requestDto.getAuthor());
+    topic.setCourse(requestDto.getCourse());
+
+    topic = topicRepository.save(topic);
+    TopicResponseDto responseDto = convertToDto(topic);
+
+    return new ApiResponse<>(true, 200, "Tópico actualizado exitosamente.", List.of(responseDto));
+  }
+
+  @Transactional
+  public ApiResponse<Void> deleteTopic(Long id) {
+    Optional<Topic> topicOptional = topicRepository.findById(id);
+
+    if (!topicOptional.isPresent()) {
+      return new ApiResponse<>(false, 404, "Tópico no encontrado.", null);
+    }
+
+    topicRepository.deleteById(id);
+    return new ApiResponse<>(true, 200, "Tópico eliminado exitosamente.", null);
   }
 
 }

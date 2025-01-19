@@ -19,4 +19,5 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
   Page<Topic> findByCourseAndYear(@Param("course") String course, @Param("year") Integer year, Pageable pageable);
 
   boolean existsByTitleAndMessage(String title, String message);
+  
 }

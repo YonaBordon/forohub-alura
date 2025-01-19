@@ -1,12 +1,11 @@
 package com.alura.forohub.forohub.controller;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +19,7 @@ import com.alura.forohub.forohub.service.TopicService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/topics")
@@ -41,4 +41,17 @@ public class TopicController {
 
     return topicService.getAllTopics(course, year, pageable);
   }
+
+  @GetMapping("/{id}")
+  public ApiResponse<TopicResponseDto> getTopicDetails(@PathVariable Long id) {
+    return topicService.getTopicDetails(id);
+  }
+
+  @PutMapping("/{id}")
+  public ApiResponse<TopicResponseDto> updateTopic(@PathVariable Long id,
+      @RequestBody @Valid TopicRequestDto requestDto) {
+    return topicService.updateTopic(id, requestDto);
+
+  }
+
 }
