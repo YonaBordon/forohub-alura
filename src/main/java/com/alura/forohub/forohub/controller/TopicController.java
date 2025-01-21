@@ -18,6 +18,7 @@ import com.alura.forohub.forohub.dto.TopicRequestDto;
 import com.alura.forohub.forohub.dto.TopicResponseDto;
 import com.alura.forohub.forohub.service.TopicService;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RestController
 @RequestMapping("/topics")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearer-key")
 public class TopicController {
   private final TopicService topicService;
 
