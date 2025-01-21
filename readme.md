@@ -154,3 +154,21 @@ Para ejecutar el proyecto, usa el siguiente comando en la terminal:
     `
     mvn spring-boot:run
     `
+
+---
+
+## Documentación de Swagger
+La API incluye una interfaz de documentación generada automáticamente con Swagger UI. Esto permite explorar y probar los endpoints de manera interactiva.
+
+### Acceso a Swagger:
+1. **Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)  
+   Interfaz gráfica para explorar los endpoints de la API.
+   
+2. **JSON de la documentación**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)  
+   JSON generado automáticamente para integración con herramientas externas.
+
+### Notas importantes:
+- Los endpoints de Swagger son accesibles públicamente (no requieren token de autenticación).
+- Si se despliega en un entorno distinto al local, la URL base cambiará según la configuración del servidor.
+
+---
